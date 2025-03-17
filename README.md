@@ -1,2 +1,2 @@
 # ping
-a desktop buddy for your productivity
+all of your notifications, in one place.
