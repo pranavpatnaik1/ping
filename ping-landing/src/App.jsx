@@ -86,7 +86,7 @@ function App() {
         <div className='tab-content'>
           <div className='title'>ping.</div>
           <div className='subtitle'>
-            your <u>all-in-one</u> desktop companion
+            your <u><span className='all-in-one'>all-in-one</span></u> desktop companion
           </div>
           <div className='start-btn'>stay in the loop.</div>
         </div>
