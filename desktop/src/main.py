@@ -27,28 +27,44 @@ class DesktopBuddy:
         self.root.configure(bg=self.transparent_color)
         self.root.attributes('-transparentcolor', self.transparent_color)
         
-        # Load and resize both idle and improve images
+        # Load and resize all images
         idle_image = Image.open("../assets/ping-idle.png")
         improve_image = Image.open("../assets/ping-idle-improve.png")
+        limp_image = Image.open("../assets/ping-raise.png")  # Add this line
+        fall_image = Image.open("../assets/ping-falling.png")  # Add this line
         
         idle_image = idle_image.resize((50, 50), Image.Resampling.LANCZOS)
         improve_image = improve_image.resize((50, 50), Image.Resampling.LANCZOS)
+        limp_image = limp_image.resize((50, 50), Image.Resampling.LANCZOS)
+        fall_image = fall_image.resize((50, 50), Image.Resampling.LANCZOS)
         
         if idle_image.mode != 'RGBA':
             idle_image = idle_image.convert('RGBA')
         if improve_image.mode != 'RGBA':
             improve_image = improve_image.convert('RGBA')
+        if limp_image.mode != 'RGBA':  # Add this block
+            limp_image = limp_image.convert('RGBA')
 
         # Create all image variants
         self.image_idle_right = ImageTk.PhotoImage(idle_image)
         self.image_idle_left = ImageTk.PhotoImage(idle_image.transpose(Image.FLIP_LEFT_RIGHT))
         self.image_improve_right = ImageTk.PhotoImage(improve_image)
         self.image_improve_left = ImageTk.PhotoImage(improve_image.transpose(Image.FLIP_LEFT_RIGHT))
+        self.image_limp_right = ImageTk.PhotoImage(limp_image)  # Add these lines
+        self.image_limp_left = ImageTk.PhotoImage(limp_image.transpose(Image.FLIP_LEFT_RIGHT))
+        self.image_fall_right = ImageTk.PhotoImage(fall_image)
+        self.image_fall_left = ImageTk.PhotoImage(fall_image.transpose(Image.FLIP_LEFT_RIGHT))
         
         self.photo = self.image_idle_left  # Default state
         
-        # Create label without border
-        self.label = Label(root, image=self.photo, bd=0, bg=self.transparent_color, highlightthickness=0, padx=20, pady=20)
+        # Create label without border or padding
+        self.label = Label(root, 
+                          image=self.photo, 
+                          bd=0, 
+                          bg=self.transparent_color, 
+                          highlightthickness=0,
+                          padx=0,  # Remove horizontal padding
+                          pady=0)  # Remove vertical padding
         self.label.pack()
         
         # Create separate window for speech bubble
@@ -107,10 +123,16 @@ class DesktopBuddy:
         self.dragging = True
         self.x = event.x
         self.y = event.y
-        self.hide_todo(event)  # Hide bubble when starting drag
+        # Change to limp image when starting drag
+        is_on_left = self.root.winfo_x() < (self.root.winfo_screenwidth() / 2)
+        self.label.configure(image=self.image_limp_left if is_on_left else self.image_limp_right)
+        self.hide_todo(event)
 
     def stop_move(self, event):
         self.dragging = False
+        # Change to fall image when starting to fall
+        is_on_left = self.root.winfo_x() < (self.root.winfo_screenwidth() / 2)
+        self.label.configure(image=self.image_fall_right if is_on_left else self.image_fall_left)
         # Start falling animation
         self.fall_speed = 0
         screen_height = GetSystemMetrics(1)
@@ -123,8 +145,9 @@ class DesktopBuddy:
         x = self.root.winfo_x() + deltax
         y = self.root.winfo_y() + deltay
         self.root.geometry(f"+{x}+{y}")
-        self.update_cat_direction()  # Add this line
-        # Move bubble window along with character if visible
+        # Update limp direction while dragging
+        is_on_left = x < (self.root.winfo_screenwidth() / 2)
+        self.label.configure(image=self.image_limp_left if is_on_left else self.image_limp_right)
         if self.bubble_window.winfo_viewable():
             self.position_bubble()
 
@@ -229,9 +252,11 @@ class DesktopBuddy:
                 self.position_bubble()
 
     def hide_todo(self, event):
-        # Restore idle image
-        is_on_left = self.root.winfo_x() < (self.root.winfo_screenwidth() / 2)
-        self.label.configure(image=self.image_idle_left if is_on_left else self.image_idle_right)
+        # Only change to idle image if we're not falling and at the target y position
+        if not self.fall_id and self.root.winfo_y() >= self.target_y:
+            is_on_left = self.root.winfo_x() < (self.root.winfo_screenwidth() / 2)
+            self.label.configure(image=self.image_idle_left if is_on_left else self.image_idle_right)
+        
         if self.fade_id:
             self.root.after_cancel(self.fade_id)
         if self.expand_id:
@@ -274,13 +299,18 @@ class DesktopBuddy:
             
             # Check if we've hit or passed the target
             if new_y >= self.target_y:
+                # Set final position
                 new_y = self.target_y
+                self.root.geometry(f"+{self.root.winfo_x()}+{int(new_y)}")
+                
+                # Only NOW change back to idle image
+                is_on_left = self.root.winfo_x() < (self.root.winfo_screenwidth() / 2)
+                self.label.configure(image=self.image_idle_left if is_on_left else self.image_idle_right)
                 self.fall_id = None
             else:
+                # Still falling, update position and continue animation
+                self.root.geometry(f"+{self.root.winfo_x()}+{int(new_y)}")
                 self.fall_id = self.root.after(16, self.fall_animation)  # ~60fps
-            
-            # Update position
-            self.root.geometry(f"+{self.root.winfo_x()}+{int(new_y)}")
 
     def __del__(self):
         self.observer.stop()
