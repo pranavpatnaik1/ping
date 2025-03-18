@@ -74,6 +74,10 @@ class DesktopBuddy:
         self.expand_progress = 0.0
         self.final_height = 0
         self.dragging = False  # Add this new variable
+        self.fall_id = None  # Add this for fall animation
+        self.fall_speed = 0  # Initial fall speed
+        self.fall_acceleration = 0.5  # Acceleration rate
+        self.target_y = 0  # Will store the target y position
         
         # Bind events
         self.label.bind('<Button-1>', self.start_move)
@@ -107,6 +111,11 @@ class DesktopBuddy:
 
     def stop_move(self, event):
         self.dragging = False
+        # Start falling animation
+        self.fall_speed = 0
+        screen_height = GetSystemMetrics(1)
+        self.target_y = screen_height - 90  # Same as initial_y
+        self.fall_animation()
 
     def on_drag(self, event):
         deltax = event.x - self.x
@@ -251,6 +260,27 @@ class DesktopBuddy:
                         self.bubble.config(text=self.current_todo)
         except FileNotFoundError:
             self.current_todo = "No todo.txt found!"
+
+    def fall_animation(self):
+        if self.fall_id:
+            self.root.after_cancel(self.fall_id)
+        
+        current_y = self.root.winfo_y()
+        
+        if current_y < self.target_y:
+            # Apply gravity
+            self.fall_speed += self.fall_acceleration
+            new_y = current_y + self.fall_speed
+            
+            # Check if we've hit or passed the target
+            if new_y >= self.target_y:
+                new_y = self.target_y
+                self.fall_id = None
+            else:
+                self.fall_id = self.root.after(16, self.fall_animation)  # ~60fps
+            
+            # Update position
+            self.root.geometry(f"+{self.root.winfo_x()}+{int(new_y)}")
 
     def __del__(self):
         self.observer.stop()
