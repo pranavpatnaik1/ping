@@ -5,8 +5,23 @@ function App() {
   const [position, setPosition] = useState({ x: 40, y: 50 });
   const [isDragging, setIsDragging] = useState(false);
   const [showContent, setShowContent] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
   const tabRef = useRef(null);
   const dragOffset = useRef({ x: 0, y: 0 });
+
+  // Check if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
 
   const handleMouseDown = (e) => {
     setIsDragging(true);
@@ -59,6 +74,27 @@ function App() {
     };
   }, [isDragging]);
 
+  // Modify App.jsx to show the cat under the mobile message
+  if (isMobile) {
+    return (
+      <div className="mobile-container">
+        <div className="mobile-content">
+          <div className="mobile-message">
+            <div className="mobile-title">ping.</div>
+            <div className='mobile-subtitle'>
+              <p>ping is best experienced on desktop.</p>
+              <p>please visit us on your PC!</p>
+            </div>
+          </div>
+          <div className="mobile-cat-container">
+            <img src="/ping-cat.png" alt="Ping Cat" className="mobile-cat" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Return desktop view if not mobile
   return (
     <div className='main'>
       <div className='background'></div>

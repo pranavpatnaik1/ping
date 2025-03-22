@@ -211,3 +211,75 @@ body {
   opacity: 0; /* Start invisible */
 }
 
+/* Mobile styles */
+.mobile-container {
+  background-color: #FF7206;
+  background-image: repeating-radial-gradient(
+    circle at 0 0,
+    transparent 0,
+    #ff8a04 10px
+  ),
+  repeating-linear-gradient(#ffffff8e, #ff6a00);
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.mobile-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 90%;
+}
+
+.mobile-message {
+  background-color: #E46B00;
+  border: 2px solid white;
+  border-radius: 10px;
+  padding: 30px;
+  width: 80%;
+  max-width: 350px;
+  text-align: center;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.25);
+  animation: fadeIn 0.6s ease-out forwards;
+  margin-bottom: 20px;
+}
+
+.mobile-title {
+  font-family: 'Inter', sans-serif;
+  font-style: italic;
+  font-size: 80px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 20px;
+  text-shadow: 0px 3px 2px rgba(0, 0, 0, 0.4);
+}
+
+.mobile-message p {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  color: white;
+  font-size: 18px;
+  margin: 10px 0;
+  text-shadow: 0px 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+.mobile-cat-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  animation: fadeIn 0.6s ease-out 0.3s forwards;
+  opacity: 0;
+}
+
+.mobile-cat {
+  width: 100%;
+  max-width: 350px; /* Same as the max-width of the message box */
+  height: auto;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.25));
+  transform: scale(1.05); /* Slightly larger than the box */
+}
