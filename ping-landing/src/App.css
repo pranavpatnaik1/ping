@@ -211,7 +211,7 @@ body {
   opacity: 0; /* Start invisible */
 }
 
-/* Mobile styles */
+/* Mobile styles update */
 .mobile-container {
   background-color: #FF7206;
   background-image: repeating-radial-gradient(
@@ -232,14 +232,17 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center; /* Added for vertical centering */
   max-width: 90%;
+  height: 100%; /* Added to take full height */
+  padding: 20px 0; /* Added for some padding at top and bottom */
 }
 
 .mobile-message {
   background-color: #E46B00;
   border: 2px solid white;
   border-radius: 10px;
-  padding: 30px;
+  padding: 25px;
   width: 80%;
   max-width: 350px;
   text-align: center;
