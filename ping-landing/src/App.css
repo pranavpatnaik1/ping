@@ -233,7 +233,10 @@ body {
   justify-content: center;
   max-width: 90%;
   padding: 20px;
-  gap: 20px; /* Add consistent spacing between elements */
+  gap: 20px;
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .mobile-message {
