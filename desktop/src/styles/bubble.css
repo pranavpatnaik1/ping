@@ -1,0 +1,19 @@
+body {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  font-family: Arial, sans-serif;
+}
+
+.bubble {
+  background: #ffffff;
+  color: #000000;
+  padding: 15px;
+  border-radius: 10px;
+  border: 2px solid white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  font-size: 16px;
+  max-width: 200px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}

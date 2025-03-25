@@ -1,0 +1,17 @@
+{
+  "name": "ping-desktop",
+  "version": "1.0.0",
+  "description": "Ping desktop buddy",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "nodemon --watch src --watch src/**/* --ext js,html,css --exec electron ."
+  },
+  "dependencies": {
+    "chokidar": "^3.6.0",
+    "electron": "^29.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
