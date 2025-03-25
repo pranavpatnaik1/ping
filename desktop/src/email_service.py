@@ -3,6 +3,7 @@ import base64
 import pickle
 import time
 import threading
+import json
 from datetime import datetime, timedelta
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -18,8 +19,8 @@ CLIENT_ID = os.getenv('GMAIL_CLIENT_ID')
 CLIENT_SECRET = os.getenv('GMAIL_CLIENT_SECRET')
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
-# Path to todo.txt
-TODO_FILE = os.path.join(os.path.dirname(__file__), '../assets/todo.txt')
+# Path to notifications.json
+NOTIFICATIONS_FILE = os.path.join(os.path.dirname(__file__), '../assets/notifications.json')
 
 # Store the ID of the last processed email
 last_email_id = None
@@ -76,17 +77,21 @@ def get_gmail_service(creds):
         log(f"An error occurred: {error}")
         return None
 
-# Update todo.txt with email notifications
-def update_todo_with_emails(messages, service, user_id='me'):
+# Update notifications.json with email notifications
+def update_notifications_with_emails(messages, service, user_id='me'):
     try:
-        # Read existing content if file exists
-        todo_content = ''
-        if os.path.exists(TODO_FILE):
-            with open(TODO_FILE, 'r', encoding='utf-8') as f:
-                todo_content = f.read()
+        # Read existing notifications if file exists
+        notifications = []
+        if os.path.exists(NOTIFICATIONS_FILE):
+            try:
+                with open(NOTIFICATIONS_FILE, 'r', encoding='utf-8') as f:
+                    notifications = json.load(f)
+            except json.JSONDecodeError:
+                # If the file is corrupted, start fresh
+                notifications = []
         
         # Process new messages
-        new_emails_text = []
+        new_emails = []
         for message in messages[:5]:  # Limit to 5 most recent
             msg = service.users().messages().get(userId=user_id, id=message['id']).execute()
             headers = msg['payload']['headers']
@@ -101,32 +106,33 @@ def update_todo_with_emails(messages, service, user_id='me'):
                 if sender_name:
                     sender = sender_name
             
-            # Add to list
-            new_emails_text.append(f"📧 {sender}: {subject}")
+            # Create email notification object
+            email_notification = {
+                'type': 'email',
+                'sender': sender,
+                'subject': subject,
+                'timestamp': datetime.now().isoformat(),
+                'id': message['id'],
+                'read': False
+            }
+            
+            new_emails.append(email_notification)
         
-        # Combine new emails with existing content
-        if new_emails_text:
-            # Split existing content by lines
-            existing_lines = todo_content.strip().split('\n') if todo_content.strip() else []
+        # Add new emails to the notifications list
+        if new_emails:
+            # Add new emails at the beginning
+            updated_notifications = new_emails + notifications
             
-            # Filter out existing email notifications to avoid duplicates
-            filtered_lines = [line for line in existing_lines if not line.startswith('📧 ')]
+            # Write back to JSON file
+            with open(NOTIFICATIONS_FILE, 'w', encoding='utf-8') as f:
+                json.dump(updated_notifications, f, indent=2)
             
-            # Combine new emails with filtered content
-            updated_content = '\n'.join(new_emails_text)
-            if filtered_lines:
-                updated_content += '\n\n' + '\n'.join(filtered_lines)
-            
-            # Write back to todo.txt
-            with open(TODO_FILE, 'w', encoding='utf-8') as f:
-                f.write(updated_content)
-            
-            log(f"Added {len(new_emails_text)} new emails to todo.txt")
+            log(f"Added {len(new_emails)} new emails to notifications.json")
             return True
         return False
             
     except Exception as e:
-        log(f"Error updating todo with emails: {e}")
+        log(f"Error updating notifications with emails: {e}")
         return False
 
 # Check for recent emails
@@ -168,8 +174,8 @@ def check_recent_emails(service, user_id='me'):
         else:
             log(f"Found {len(new_messages)} new messages")
             
-            # Update todo.txt with these messages
-            updated = update_todo_with_emails(new_messages, service, user_id)
+            # Update notifications.json with these messages
+            updated = update_notifications_with_emails(new_messages, service, user_id)
             
             # Print details for debugging
             for message in new_messages[:3]:  # Limit to 3 for debugging
@@ -273,6 +279,30 @@ def main():
             log("Failed to start email checker")
     except Exception as e:
         log(f"Error in main: {e}")
+
+# Add this function to email_service.py to force a check
+def force_check():
+    """Force a check for new emails and update notifications.json"""
+    global last_email_id
+    
+    try:
+        # Reset the last email ID to force a full check
+        last_email_id = None
+        
+        # Authenticate and get service
+        creds = authenticate_gmail_api()
+        service = get_gmail_service(creds)
+        
+        if not service:
+            log("Failed to initialize Gmail service")
+            return False
+        
+        # Check for emails
+        result = check_recent_emails(service)
+        return result
+    except Exception as e:
+        log(f"Error in force_check: {e}")
+        return False
 
 if __name__ == '__main__':
     main()

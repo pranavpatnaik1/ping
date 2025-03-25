@@ -28,7 +28,7 @@ function createWindow() {
   // Create the bubble window
   bubbleWindow = new BrowserWindow({
     width: 320,
-    height: 500,
+    height: 400, // Increased height
     frame: false,
     transparent: true,
     alwaysOnTop: true,
@@ -115,10 +115,16 @@ ipcMain.on('get-screen-metrics', (event) => {
 });
 
 ipcMain.on('show-bubble', (event, x, y) => {
-  console.log('Showing bubble at:', x, y);
+  // Position the bubble window
   bubbleWindow.setPosition(x, y);
+  
+  // Show the bubble window
   bubbleWindow.show();
-  bubbleWindow.webContents.send('fade-in');
+  
+  // Tell the bubble window to fade in
+  setTimeout(() => {
+    bubbleWindow.webContents.send('fade-in');
+  }, 50);
 });
 
 ipcMain.on('hide-bubble', () => {
@@ -146,7 +152,8 @@ ipcMain.on('pin-bubble', (event, isPinned) => {
 });
 
 ipcMain.on('update-bubble-position', (event, x, y) => {
-  bubbleWindow.setPosition(x, y);
+  // Tell the bubble window to update its position
+  bubbleWindow.webContents.send('position-bubble', x, y);
 });
 
 ipcMain.on('bubble-mouse-enter', () => {

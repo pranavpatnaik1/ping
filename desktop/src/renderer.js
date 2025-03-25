@@ -23,7 +23,10 @@ const catStates = {
 };
 
 // Watch notifications.json for changes
-const watcher = chokidar.watch(path.join(__dirname, '../assets/todo.txt'), {
+const notificationsPath = path.join(__dirname, '../assets/notifications.json');
+console.log('Setting up chokidar watcher for:', notificationsPath);
+
+const watcher = chokidar.watch(notificationsPath, {
   persistent: true,
   awaitWriteFinish: {
     stabilityThreshold: 300,
@@ -31,9 +34,14 @@ const watcher = chokidar.watch(path.join(__dirname, '../assets/todo.txt'), {
   }
 });
 
-watcher.on('change', (path) => {
-  console.log(`todo.txt changed at ${new Date().toISOString()}`);
+watcher.on('change', (changedPath) => {
+  console.log(`notifications.json changed at ${new Date().toISOString()}`);
+  console.log('Changed path:', changedPath);
   updateTodo();
+});
+
+watcher.on('error', (error) => {
+  console.error('Watcher error:', error);
 });
 
 // Watch CSS files for changes
@@ -58,13 +66,12 @@ cssWatcher.on('change', (path) => {
 
 function updateTodo() {
   try {
-    console.log('Reading todo.txt...');
-    const todo = fs.readFileSync(path.join(__dirname, '../assets/todo.txt'), 'utf8');
-    console.log(`todo.txt content length: ${todo.length}`);
-    ipcRenderer.send('update-todo', todo);
+    console.log('Reading notifications.json...');
+    // We don't need to read the file here, bubble.js will handle it
+    ipcRenderer.send('update-todo', '');
   } catch (err) {
-    console.error('Error reading todo.txt:', err);
-    ipcRenderer.send('update-todo', 'No todo.txt found!');
+    console.error('Error reading notifications.json:', err);
+    ipcRenderer.send('update-todo', 'No notifications found!');
   }
 }
 
@@ -99,17 +106,21 @@ function updateCatDirection() {
   }
 }
 
-// Show the bubble with todo list
+// Show the bubble with notifications
 function showBubble() {
   const [winX, winY] = ipcRenderer.sendSync('get-position');
-  const { width } = ipcRenderer.sendSync('get-screen-metrics');
+  const { width, height } = ipcRenderer.sendSync('get-screen-metrics');
   const isOnLeft = winX < width / 2;
   
   updateTodo();
   
-  // Calculate better position for the larger bubble
+  // Calculate position for the bubble
+  // The X position depends on which side of the screen the cat is on
   const bubbleX = isOnLeft ? winX + 60 : winX - 330;
-  const bubbleY = Math.max(10, winY - 450);
+  
+  // Position the bubble at a fixed height from the bottom of the screen
+  // This ensures the bubble is always at the same height
+  const bubbleY = height - 450;
   
   ipcRenderer.send('show-bubble', bubbleX, bubbleY);
 }
@@ -189,12 +200,12 @@ document.addEventListener('mousemove', (e) => {
   // Update bubble position if pinned
   if (isPinned) {
     const [winX, winY] = ipcRenderer.sendSync('get-position');
-    const { width } = ipcRenderer.sendSync('get-screen-metrics');
+    const { width, height } = ipcRenderer.sendSync('get-screen-metrics');
     const isOnLeft = winX < width / 2;
     
     ipcRenderer.send('update-bubble-position',
       isOnLeft ? winX + 60 : winX - 330,
-      Math.max(10, winY - 450)
+      Math.max(10, height - 150)
     );
   }
 });
@@ -243,7 +254,7 @@ document.addEventListener('mouseup', (e) => {
           
           ipcRenderer.send('update-bubble-position',
             isOnLeft ? currentX + 60 : currentX - 330,
-            Math.max(10, currentY - 450)
+            Math.max(10, currentY - 80)
           );
         }
       } else {
@@ -252,12 +263,12 @@ document.addEventListener('mouseup', (e) => {
         
         // Update bubble position during fall if pinned
         if (isPinned) {
-          const { width } = ipcRenderer.sendSync('get-screen-metrics');
+          const { width, height } = ipcRenderer.sendSync('get-screen-metrics');
           const isOnLeft = currentX < width / 2;
           
           ipcRenderer.send('update-bubble-position',
             isOnLeft ? currentX + 60 : currentX - 330,
-            Math.max(10, currentY - 450)
+            Math.max(10, height - 150)
           );
         }
       }

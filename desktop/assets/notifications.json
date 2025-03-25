@@ -1,0 +1,70 @@
+[
+  {
+    "type": "email",
+    "sender": "Pranav Patnaik",
+    "subject": "test 5",
+    "timestamp": "2025-03-25T16:04:31.741738",
+    "id": "195cee7f67136305",
+    "read": false
+  },
+  {
+    "type": "email",
+    "sender": "Pranav Patnaik",
+    "subject": "test 4",
+    "timestamp": "2025-03-25T15:57:41.529721",
+    "id": "195cee183a12b80f",
+    "read": false
+  },
+  {
+    "type": "email",
+    "sender": "Pranav Patnaik",
+    "subject": "test 3",
+    "timestamp": "2025-03-25T15:47:11.161909",
+    "id": "195ced81ef0c21f4",
+    "read": false
+  },
+  {
+    "type": "email",
+    "sender": "Pranav Patnaik",
+    "subject": "test 2",
+    "timestamp": "2025-03-25T15:45:41.032514",
+    "id": "195ced67bdd3413f",
+    "read": false
+  },
+  {
+    "type": "email",
+    "sender": "Sailata Patnaik",
+    "subject": "Shower",
+    "timestamp": "2025-03-25T15:27:28.033927",
+    "id": "195cec5f7d796224",
+    "read": false
+  },
+  {
+    "type": "email",
+    "sender": "Pranav Patnaik",
+    "subject": "hellloooooooooooo",
+    "timestamp": "2025-03-25T15:18:27.358587",
+    "id": "195cebdb247d2eca",
+    "read": false
+  },
+  {
+    "type": "email",
+    "sender": "Pranav Patnaik",
+    "subject": "hiiiiiiiiii",
+    "timestamp": "2025-03-25T15:17:57.354724",
+    "id": "195cebd4e3f54852",
+    "read": false
+  },
+  {
+    "type": "system",
+    "message": "Welcome to Ping! Your notifications will appear here.",
+    "timestamp": "2025-03-25T15:15:52.720586",
+    "read": false
+  },
+  {
+    "type": "task",
+    "message": "study",
+    "timestamp": "2025-03-25T15:15:52.720586",
+    "read": false
+  }
+]

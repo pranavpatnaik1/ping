@@ -6,6 +6,8 @@ import time
 import threading
 import sys
 import os
+import json
+from datetime import datetime
 
 def initialize_services():
     try:
@@ -15,13 +17,26 @@ def initialize_services():
         email_thread.start()
         print("Email checker started")
         
-        # Create todo.txt if it doesn't exist
-        todo_file = os.path.join(os.path.dirname(__file__), '../assets/todo.txt')
-        if not os.path.exists(os.path.dirname(todo_file)):
-            os.makedirs(os.path.dirname(todo_file))
-        if not os.path.exists(todo_file):
-            with open(todo_file, 'w', encoding='utf-8') as f:
-                f.write("Welcome to Ping! Your emails will appear here.")
+        # Create notifications.json if it doesn't exist
+        notifications_file = os.path.join(os.path.dirname(__file__), '../assets/notifications.json')
+        if not os.path.exists(os.path.dirname(notifications_file)):
+            os.makedirs(os.path.dirname(notifications_file))
+        if not os.path.exists(notifications_file):
+            with open(notifications_file, 'w', encoding='utf-8') as f:
+                json.dump([
+                    {
+                        "type": "system",
+                        "message": "Welcome to Ping! Your notifications will appear here.",
+                        "timestamp": datetime.now().isoformat(),
+                        "read": False
+                    },
+                    {
+                        "type": "task",
+                        "message": "study",
+                        "timestamp": datetime.now().isoformat(),
+                        "read": False
+                    }
+                ], f, indent=2)
         
         return True
     except Exception as e:

@@ -5,46 +5,67 @@ body {
   font-family: Arial, sans-serif;
 }
 
-.bubble {
-  background: #ffffff;
-  color: #000000;
-  padding: 15px;
+.bubble-container {
+  position: fixed;
+  width: 320px;
+  height: 400px; /* Increased height */
   border-radius: 10px;
-  border: 2px solid white;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  font-size: 16px;
-  max-width: 300px;
-  max-height: 80vh;
-  opacity: 0;
-  transition: opacity 0.3s;
-  overflow-y: auto;
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: opacity 0.3s ease;
+  opacity: 0; /* Start hidden */
+  z-index: 1000;
+  overflow: hidden; /* Hide overflow */
 }
 
-.bubble.pinned {
+.bubble-container.pinned {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
   border: 2px solid #ffcc00;
-  box-shadow: 0 0 8px rgba(255, 204, 0, 0.5);
+}
+
+.bubble-content {
+  height: 100%;
+  overflow-y: auto; /* Enable vertical scrolling */
+  padding: 15px;
+}
+
+/* Scrollbar styling */
+.bubble-content::-webkit-scrollbar {
+  width: 5px;
+}
+
+.bubble-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.bubble-content::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.bubble-content::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 
 .notification-item {
-  padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  background-color: #f9f9f9;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.2s;
+  padding: 10px 15px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  background-color: #f5f5f5;
+  border-left: 3px solid #ccc;
+  font-size: 14px;
+  line-height: 1.4;
 }
 
-.notification-item:hover {
-  background-color: #f0f0f0;
-}
-
+/* Ensure the last item has proper spacing */
 .notification-item:last-child {
-  margin-bottom: 0;
+  margin-bottom: 10px;
 }
 
 .email-notification {
   border-left: 3px solid #4285f4;
+  background-color: #e8f0fe;
 }
 
 .task-item {
@@ -54,22 +75,4 @@ body {
 .system-notification {
   border-left: 3px solid #ff9800; /* Orange for system messages */
   background-color: #fff8e1;
-}
-
-.bubble::-webkit-scrollbar {
-  width: 8px;
-}
-
-.bubble::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
-}
-
-.bubble::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 10px;
-}
-
-.bubble::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
 }
