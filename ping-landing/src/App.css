@@ -219,11 +219,12 @@ body {
     #ff8a04 10px
   ),
   repeating-linear-gradient(#ffffff8e, #ff6a00);
-  min-height: 100vh;
+  height: 100vh;
   width: 100vw;
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
 }
 
 .mobile-content {
@@ -232,11 +233,9 @@ body {
   align-items: center;
   justify-content: center;
   max-width: 90%;
+  max-height: 100vh;
   padding: 20px;
   gap: 20px;
-  position: fixed;
-  top: 50%;
-  transform: translateY(-50%);
 }
 
 .mobile-message {
@@ -282,8 +281,10 @@ body {
 
 .mobile-cat {
   width: 100%;
-  max-width: 350px; /* Same as the max-width of the message box */
+  max-width: 350px;
   height: auto;
+  max-height: 40vh;
+  object-fit: contain;
   filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.25));
   transform: scale(1.05); /* Slightly larger than the box */
 }
