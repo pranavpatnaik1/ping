@@ -24,11 +24,15 @@ const catStates = {
 
 // Watch notifications.json for changes
 const watcher = chokidar.watch(path.join(__dirname, '../assets/todo.txt'), {
-  persistent: true
+  persistent: true,
+  awaitWriteFinish: {
+    stabilityThreshold: 300,
+    pollInterval: 100
+  }
 });
 
-watcher.on('change', () => {
-  console.log('todo.txt changed, updating todo');
+watcher.on('change', (path) => {
+  console.log(`todo.txt changed at ${new Date().toISOString()}`);
   updateTodo();
 });
 
@@ -54,9 +58,12 @@ cssWatcher.on('change', (path) => {
 
 function updateTodo() {
   try {
+    console.log('Reading todo.txt...');
     const todo = fs.readFileSync(path.join(__dirname, '../assets/todo.txt'), 'utf8');
+    console.log(`todo.txt content length: ${todo.length}`);
     ipcRenderer.send('update-todo', todo);
   } catch (err) {
+    console.error('Error reading todo.txt:', err);
     ipcRenderer.send('update-todo', 'No todo.txt found!');
   }
 }

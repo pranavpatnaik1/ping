@@ -24,6 +24,10 @@ TODO_FILE = os.path.join(os.path.dirname(__file__), '../assets/todo.txt')
 # Store the ID of the last processed email
 last_email_id = None
 
+# Improved logging function
+def log(message):
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {message}")
+
 # Authentication and building the Gmail service
 def authenticate_gmail_api():
     creds = None
@@ -69,7 +73,7 @@ def get_gmail_service(creds):
         service = build('gmail', 'v1', credentials=creds)
         return service
     except Exception as error:
-        print(f"An error occurred: {error}")
+        log(f"An error occurred: {error}")
         return None
 
 # Update todo.txt with email notifications
@@ -117,12 +121,12 @@ def update_todo_with_emails(messages, service, user_id='me'):
             with open(TODO_FILE, 'w', encoding='utf-8') as f:
                 f.write(updated_content)
             
-            print(f"Added {len(new_emails_text)} new emails to todo.txt")
+            log(f"Added {len(new_emails_text)} new emails to todo.txt")
             return True
         return False
             
     except Exception as e:
-        print(f"Error updating todo with emails: {e}")
+        log(f"Error updating todo with emails: {e}")
         return False
 
 # Check for recent emails
@@ -138,13 +142,13 @@ def check_recent_emails(service, user_id='me'):
         messages = results.get('messages', [])
 
         if not messages:
-            print(f"No messages found in inbox ({datetime.now().strftime('%H:%M:%S')})")
+            log(f"No messages found in inbox")
             return False
         
         # If this is the first run, just store the most recent email ID
         if last_email_id is None:
             last_email_id = messages[0]['id']
-            print(f"First run - storing latest email ID: {last_email_id}")
+            log(f"First run - storing latest email ID: {last_email_id}")
             return False
         
         # Find new messages (those with IDs we haven't seen before)
@@ -159,10 +163,10 @@ def check_recent_emails(service, user_id='me'):
             last_email_id = messages[0]['id']
         
         if not new_messages:
-            print(f"No new messages since last check ({datetime.now().strftime('%H:%M:%S')})")
+            log(f"No new messages since last check")
             return False
         else:
-            print(f"Found {len(new_messages)} new messages at {datetime.now().strftime('%H:%M:%S')}")
+            log(f"Found {len(new_messages)} new messages")
             
             # Update todo.txt with these messages
             updated = update_todo_with_emails(new_messages, service, user_id)
@@ -174,12 +178,12 @@ def check_recent_emails(service, user_id='me'):
                 
                 # Extract subject
                 subject = next((header['value'] for header in headers if header['name'] == 'Subject'), '(No subject)')
-                print(f"Subject: {subject}")
+                log(f"Subject: {subject}")
             
             return updated
         
     except HttpError as error:
-        print(f"An error occurred: {error}")
+        log(f"An error occurred: {error}")
         return False
 
 # Email checker class for background monitoring
@@ -197,7 +201,7 @@ class EmailChecker:
             self.service = get_gmail_service(creds)
             
             if not self.service:
-                print("Failed to initialize Gmail service")
+                log("Failed to initialize Gmail service")
                 return False
             
             # Start checking thread
@@ -206,29 +210,41 @@ class EmailChecker:
             self.thread.daemon = True
             self.thread.start()
             
-            # Do an initial check immediately
-            threading.Thread(target=lambda: check_recent_emails(self.service)).start()
+            # Do an initial check immediately (directly, not in a separate thread)
+            check_recent_emails(self.service)
             
             return True
         except Exception as e:
-            print(f"Error starting email checker: {e}")
+            log(f"Error starting email checker: {e}")
             return False
     
     def _check_loop(self):
         while self.running:
+            start_time = time.time()
+            
             try:
                 # Check for new emails
                 check_recent_emails(self.service)
+            except HttpError as e:
+                log(f"API error: {e}. Reconnecting...")
+                try:
+                    creds = authenticate_gmail_api()
+                    self.service = get_gmail_service(creds)
+                except Exception as reconnect_error:
+                    log(f"Failed to reconnect: {reconnect_error}")
             except Exception as e:
-                print(f"Error checking emails: {e}")
+                log(f"Error checking emails: {e}")
             
-            # Wait for next check
-            time.sleep(self.check_interval)
+            # Calculate remaining sleep time to maintain consistent interval
+            elapsed = time.time() - start_time
+            sleep_time = max(0, self.check_interval - elapsed)
+            time.sleep(sleep_time)
     
     def stop(self):
         self.running = False
         if self.thread:
             self.thread.join(timeout=1)
+            log("Email checker stopped gracefully")
 
 # Create a singleton instance
 email_checker = EmailChecker()
@@ -244,19 +260,19 @@ def main():
     try:
         # Start the email checker
         if start_email_checker():
-            print("Email checker started successfully")
+            log("Email checker started successfully")
             
             # Keep the script running
             try:
                 while True:
                     time.sleep(1)
             except KeyboardInterrupt:
-                print("Stopping email checker...")
+                log("Stopping email checker...")
                 stop_email_checker()
         else:
-            print("Failed to start email checker")
+            log("Failed to start email checker")
     except Exception as e:
-        print(f"Error in main: {e}")
+        log(f"Error in main: {e}")
 
 if __name__ == '__main__':
     main()

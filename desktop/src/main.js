@@ -1,6 +1,7 @@
 const { app, BrowserWindow, screen, ipcMain } = require('electron');
 const path = require('path');
 const chokidar = require('chokidar');
+const { spawn } = require('child_process');
 
 let mainWindow, bubbleWindow;
 
@@ -63,7 +64,40 @@ function createWindow() {
   });
 }
 
-app.whenReady().then(createWindow);
+// Function to start the Python email service
+function startEmailService() {
+  console.log('Starting email service...');
+  
+  const pythonProcess = spawn('python', ['src/main.py'], {
+    stdio: 'inherit',
+    shell: true
+  });
+  
+  pythonProcess.on('error', (err) => {
+    console.error('Failed to start email service:', err);
+  });
+  
+  pythonProcess.on('close', (code) => {
+    console.log(`Email service exited with code ${code}`);
+  });
+  
+  return pythonProcess;
+}
+
+// Start the email service when the app starts
+let emailServiceProcess;
+app.whenReady().then(() => {
+  createWindow();
+  emailServiceProcess = startEmailService();
+});
+
+// Kill the Python process when the app closes
+app.on('will-quit', () => {
+  if (emailServiceProcess) {
+    console.log('Stopping email service...');
+    emailServiceProcess.kill();
+  }
+});
 
 // Handle IPC events
 ipcMain.on('get-position', (event) => {
