@@ -1,0 +1,43 @@
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: transparent;
+  user-select: none;
+}
+
+#cat-container {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+}
+
+#cat {
+  width: 50px;
+  height: 50px;
+  cursor: grab;
+  pointer-events: auto; /* Ensure the cat is clickable */
+}
+
+#cat:active {
+  cursor: grabbing;
+}
+
+#todo-bubble {
+  position: absolute;
+  display: none;
+  background-color: white;
+  border: 1px solid black;
+  border-radius: 4px;
+  padding: 10px;
+  width: 200px;  /* Fixed width instead of min/max */
+  font-family: Arial, sans-serif;
+  font-size: 9pt;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 1000;  /* Ensure it's always on top */
+}
+
+#todo-content {
+  white-space: pre-wrap;
+  word-break: break-word;
+}

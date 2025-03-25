@@ -1,0 +1,3 @@
+pillow==11.1.0
+pywin32==310
+watchdog==6.0.0

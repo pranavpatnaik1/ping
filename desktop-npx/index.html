@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Ping Desktop Buddy</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="cat-container">
+    <!-- Adding width/height explicitly and a backup image source -->
+    <img id="cat" src="../desktop/assets/ping-idle-left.png" 
+         width="50" height="50" 
+         onerror="this.src='../desktop/assets/ping-idle.png'" 
+         draggable="false">
+  </div>
+  
+  <div id="todo-bubble">
+    <div id="todo-content"></div>
+  </div>
+  
+  <script src="renderer.js"></script>
+</body>
+</html>
