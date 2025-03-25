@@ -13,7 +13,63 @@ body {
   border: 2px solid white;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   font-size: 16px;
-  max-width: 200px;
+  max-width: 300px;
+  max-height: 80vh;
   opacity: 0;
   transition: opacity 0.3s;
+  overflow-y: auto;
+}
+
+.bubble.pinned {
+  border: 2px solid #ffcc00;
+  box-shadow: 0 0 8px rgba(255, 204, 0, 0.5);
+}
+
+.notification-item {
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.2s;
+}
+
+.notification-item:hover {
+  background-color: #f0f0f0;
+}
+
+.notification-item:last-child {
+  margin-bottom: 0;
+}
+
+.email-notification {
+  border-left: 3px solid #4285f4;
+}
+
+.task-item {
+  border-left: 3px solid #34a853;
+}
+
+.system-notification {
+  border-left: 3px solid #ff9800; /* Orange for system messages */
+  background-color: #fff8e1;
+}
+
+.bubble::-webkit-scrollbar {
+  width: 8px;
+}
+
+.bubble::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.bubble::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+
+.bubble::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }

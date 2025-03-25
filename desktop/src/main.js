@@ -26,8 +26,8 @@ function createWindow() {
 
   // Create the bubble window
   bubbleWindow = new BrowserWindow({
-    width: 200,
-    height: 100,
+    width: 320,
+    height: 500,
     frame: false,
     transparent: true,
     alwaysOnTop: true,
@@ -37,6 +37,8 @@ function createWindow() {
       contextIsolation: false
     }
   });
+
+  bubbleWindow.setIgnoreMouseEvents(false);
 
   mainWindow.loadFile('src/index.html');
   bubbleWindow.loadFile('src/bubble.html');
@@ -79,13 +81,17 @@ ipcMain.on('get-screen-metrics', (event) => {
 });
 
 ipcMain.on('show-bubble', (event, x, y) => {
+  console.log('Showing bubble at:', x, y);
   bubbleWindow.setPosition(x, y);
   bubbleWindow.show();
   bubbleWindow.webContents.send('fade-in');
 });
 
 ipcMain.on('hide-bubble', () => {
-  bubbleWindow.hide();
+  // Only hide if not pinned
+  if (!bubbleWindow.isPinned) {
+    bubbleWindow.hide();
+  }
 });
 
 ipcMain.on('update-todo', (event, todo) => {
@@ -95,6 +101,28 @@ ipcMain.on('update-todo', (event, todo) => {
 ipcMain.on('reload-app', () => {
   mainWindow.reload();
   bubbleWindow.reload();
+});
+
+ipcMain.on('pin-bubble', (event, isPinned) => {
+  // If pinned, make the bubble window stay on top
+  bubbleWindow.setAlwaysOnTop(true);
+  
+  // Store the pinned state
+  bubbleWindow.isPinned = isPinned;
+});
+
+ipcMain.on('update-bubble-position', (event, x, y) => {
+  bubbleWindow.setPosition(x, y);
+});
+
+ipcMain.on('bubble-mouse-enter', () => {
+  // Tell the renderer process that mouse is over bubble
+  mainWindow.webContents.send('bubble-mouse-enter');
+});
+
+ipcMain.on('bubble-mouse-leave', () => {
+  // Tell the renderer process that mouse left bubble
+  mainWindow.webContents.send('bubble-mouse-leave');
 });
 
 app.on('window-all-closed', () => {
